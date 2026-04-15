@@ -5,7 +5,12 @@ Propositional Logic Belief Base Implementation:
 """
 class Belief:
     """
-    Represents a propositional logic formula (belief).
+    This class has the operators overloaded to allow natural formula construction using Python syntax.
+     - Negation: ~p
+     - Conjunction: p & q
+     - Disjunction: p | q
+     - Implication: p >> q
+     - Equivalence: p ^ q
     """
     def __neg__(self):
         return Negation(self)
@@ -19,6 +24,9 @@ class Belief:
     def __rshift__(self, other):
         return Implication(self, other)
     
+    def __xor__(self, other):
+        return Equivalence(self, other)
+    
     def __eq__(self, other):
         return type(self) == type(other) and str(self) == str(other)
     
@@ -26,7 +34,7 @@ class Belief:
         return hash(str(self))
     
 
-class Atom(Belief):
+class Atom(Belief): # this is a basic propositional variable (e.g., "p", "q", "r")
     def __init__(self, name):
         self.name = name
     def __repr__(self):
@@ -87,7 +95,7 @@ class BeliefBase:
             print(f"Belief '{belief}' already exists in the belief base. Skipping addition.")
             return
         self.beliefs.append((belief, priority))
-        self.beliefs.sort(key=lambda x: x[1])
+        self.beliefs.sort(key=lambda x: x[1]) # sort by priority (ascending order: lowest first)
 
     def remove(self, belief):
         before = len(self.beliefs)
@@ -121,13 +129,13 @@ class BeliefBase:
     def get_highest_priority_beliefs(self) -> list:
         if self.is_empty():
             return []
-        highest_priority = max(priority for _, priority in self.beliefs)
+        highest_priority = self.beliefs[-1][1]  # last item priority = highest priority
         return [belief for belief, priority in self.beliefs if priority == highest_priority]
     
     def get_lowest_priority_beliefs(self) -> list:
         if self.is_empty():
             return []
-        lowest_priority = min(priority for _, priority in self.beliefs)
+        lowest_priority = self.beliefs[0][1]  # first item priority = lowest priority
         return [belief for belief, priority in self.beliefs if priority == lowest_priority]
 
     def __repr__(self):
@@ -140,7 +148,7 @@ class BeliefBase:
     
 
 
-
+#___________________________________________________________________#
 #Testing the belief base implementation (This was AI generated code for testing purposes)
 if __name__ == "__main__":
  
@@ -199,10 +207,14 @@ if __name__ == "__main__":
     formula2 = p | q          # Or(p, q)
     formula3 = -p             # Neg(p)
     formula4 = p >> q         # Implies(p, q)
+    formula5 = p ^ q         # Equiv(p, q)
+    formula6 = Bot()         # Contradiction (⊥)
     print(f"  p & q  = {formula1}")
     print(f"  p | q  = {formula2}")
-    print(f"  ~p     = {formula3}")
+    print(f"  -p     = {formula3}")
     print(f"  p >> q = {formula4}")
+    print(f"  p ^ q  = {formula5}")
+    print(f"  Bot()  = {formula6}")
  
     bb.add(formula1, priority=2)
     print("\nAfter adding (p ∧ q):")

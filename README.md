@@ -1,56 +1,82 @@
 # Belief Revision Group 45
 
-This project implements a propositional logic belief revision engine in Python, based on the AGM model (Alchourron, Gardenfors, Makinson, 1985).
+This project implements propositional logic belief revision engine in python with the AGM framework and applies it to a Mastermind code-breaker.
 
-## What It Does
+## Project Scope
 
-- Stores propositional beliefs with optional priorities.
-- Lets you build formulas with Python operators.
-- Converts formulas to conjunctive normal form (CNF).
-- Extracts clauses and performs resolution.
-- Checks whether a belief base entails a query.
-- Includes optional SymPy-based CNF validation for testing.
-- Contracts beliefs from the base using partial meet contraction.
-- Expands the belief base with new beliefs.
-- Revises the belief base using the Levi identity.
-- Verifies AGM postulates: Success, Inclusion, Vacuity, Consistency, Extensionality.
+The codebase has two connected parts:
 
-## Files
+1. A logic and AGM belief revision engine.
+2. A Mastermind solver that updates beliefs from black/white feedback and narrows possible codes over time.
+
+## Core Features
+
+- Propositional formula classes with operator overloading.
+- Priority-aware belief base.
+- Resolution-based entailment via CNF transformation and clause extraction.
+- AGM operations:
+	- Expansion: B + phi
+	- Contraction (partial meet): B / phi
+	- Revision (Levi identity): B * phi = (B / ~phi) + phi
+- Postulate checks: Success, Inclusion, Vacuity, Consistency, Extensionality.
+- Mastermind integration:
+	- Generates all candidate codes (6^4 = 1296)
+	- Filters by exact feedback simulation each round
+	- Applies AGM-safe updates to keep beliefs consistent
+
+## Repository Files
 
 - [belief_base.py](belief_base.py): propositional logic data structures and belief base implementation.
 - [logicalEntailment.py](logicalEntailment.py): CNF conversion, clause extraction, resolution, and entailment.
 - [belief_revision_agent.py](belief_revision_agent.py): contraction, expansion, revision, and AGM postulate checks.
+- [mastermind.py](mastermind.py): Mastermind solver using candidate filtering plus AGM belief updates.
 - [requirements.txt](requirements.txt): Python dependency list.
 
 ## Installation
-
-Install the required package with:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+## How To Run
 
-Run the entailment demo:
+Run logic entailment demo:
 
 ```bash
 python logicalEntailment.py
 ```
 
-Run the belief base demo:
+Run belief base demo:
 
 ```bash
 python belief_base.py
 ```
 
-Run the contraction, expansion and revision demo:
+Run contraction, expansion, and AGM revision demo:
 
 ```bash
 python belief_revision_agent.py
 ```
 
-## Example
+Run Mastermind demo + performance test:
+
+```bash
+python mastermind.py
+```
+
+## Mastermind Workflow
+
+At each guess:
+
+1. Compute feedback (black, white).
+2. Convert that feedback into logical constraints.
+3. Update the belief base using expansion or revision depending on contradiction.
+4. Filter candidate codes to those that would return the same feedback.
+5. Pick the next candidate that is belief-consistent.
+
+This combines direct simulation pruning with symbolic consistency checks.
+
+## Minimal Example
 
 ```python
 from belief_base import Atom, BeliefBase
@@ -68,8 +94,8 @@ print(entails(bb, q))  # True
 
 ## Notes
 
-- The optional CNF comparison helpers in [logicalEntailment.py](logicalEntailment.py) use SymPy.
-- Revision is implemented via the Levi identity: B * φ = (B ÷ ¬φ) + φ.
+- Optional CNF validation helpers in [logicalEntailment.py](logicalEntailment.py) use SymPy.
+- The current Mastermind script includes three demo runs and a 500-game performance sweep.
 
 
 

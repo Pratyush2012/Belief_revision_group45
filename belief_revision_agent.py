@@ -231,48 +231,48 @@ if __name__ == "__main__":
     print("=" * 60)
 
 
-    b = Atom("b")    # Tweety is a bird
-    f = Atom("f")    # Tweety can fly
-    r = Atom("r")    # It is raining  (unrelated — used for vacuity tests)
+    b = Atom("b")    # It is raining
+    f = Atom("f")    # It is cloudy
+    r = Atom("r")    # It is windy  (unrelated — used for vacuity tests)
 
     bb = BeliefBase()
-    bb.add(b,      priority=1)   # weak: easily given up
-    bb.add(b >> f, priority=3)   # strong rule: harder to give up
+    bb.add(b,      priority=1)   # weak: it is raining — easily given up
+    bb.add(b >> f, priority=3)   # strong rule: if it rains, it is cloudy
 
     print("\nInitial belief base:")
     print(bb)
 
     print("\n--- Entailment checks ---")
-    print(f"  B ⊢ f?  (inferred, not stored directly)  {entails(bb, f)}")   # True
-    print(f"  B ⊢ b?  (stored directly)                {entails(bb, b)}")   # True
-    print(f"  B ⊢ r?  (not in B at all)                {entails(bb, r)}")   # False
+    print(f"  B ⊢ f?  (it is cloudy — inferred, not stored directly)  {entails(bb, f)}")
+    print(f"  B ⊢ b?  (it is raining — stored directly)               {entails(bb, b)}")
+    print(f"  B ⊢ r?  (it is windy — not in B at all)                 {entails(bb, r)}")
 
     # --- Expansion ---
-    print("\n--- Expansion: B + r  (new compatible belief, priority 2) ---")
+    print("\n--- Expansion: B + r  (it is windy — new compatible belief, priority 2) ---")
     bb_expanded = expand(bb, r, priority=2)
     print(bb_expanded)
 
-    print("--- Expansion: B + b  (b already in B — no change) ---")
+    print("--- Expansion: B + b  (it is raining — already in B, no change) ---")
     print(expand(bb, b))
 
     # --- Contraction ---
-    print("\n--- Contraction: B ÷ f ---")
-    print("  f is only inferred, so we must drop b or (b>>f) to stop entailing f.")
-    print("  b has priority 1, (b>>f) has priority 3 — so b is sacrificed.")
+    print("\n--- Contraction: B ÷ f  (stop believing it is cloudy) ---")
+    print("  f is only inferred via b and (b>>f).")
+    print("  b has priority 1, (b>>f) has priority 3 — so b (raining) is sacrificed.")
     bb_contracted = contract(bb, f)
     print(bb_contracted)
-    print(f"  B ÷ f  ⊢ f?  {entails(bb_contracted, f)}")     # False — success
+    print(f"  B ÷ f  ⊢ f?  {entails(bb_contracted, f)}")
 
-    print("\n--- Contraction: B ÷ r  (vacuous — r ∉ Cn(B), base unchanged) ---")
+    print("\n--- Contraction: B ÷ r  (vacuous — it is windy ∉ Cn(B), base unchanged) ---")
     print(contract(bb, r))
 
     # --- Revision ---
-    print("\n--- Revision: B * ¬f  (Levi identity: contract f, then add ¬f) ---")
-    print("  After adding ¬f, the rule (b>>f) and ¬f together entail ¬b.")
-    print("  Learning Tweety cannot fly leads us to conclude Tweety is not a bird.")
+    print("\n--- Revision: B * ¬f  (learn: it is NOT cloudy) ---")
+    print("  Levi: contract f from B, then add ¬f.")
+    print("  (b>>f) and ¬f together entail ¬b — it is not raining.")
     bb_revised = revise(bb, Negation(f), priority=2)
     print(bb_revised)
-    print(f"  B * ¬f  ⊢ ¬b?  {entails(bb_revised, Negation(b))}")   # True
+    print(f"  B * ¬f  ⊢ ¬b?  {entails(bb_revised, Negation(b))}")
 
     print("\n--- Revision: B * r  (vacuous — ¬r ∉ Cn(B), equals expansion) ---")
     print(revise(bb, r, priority=2))
@@ -296,4 +296,3 @@ if __name__ == "__main__":
     print(f"  Consistency   B*¬f consistent:        {check_revision_consistency(bb, nf)}")
     print(f"  Extensionality ¬f vs ~~~f same conseq:{check_revision_extensionality(bb, nf, nff)}")
 
-    print("\nAll postulates should be True.")
